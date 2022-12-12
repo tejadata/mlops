@@ -9,7 +9,7 @@ import pickle
 
 
 def load_model():
-    loaded_model = pickle.load(open(r"D:\MLOPs\finalized_model.sav", 'rb'))
+    loaded_model = pickle.load(open("finalized_model.sav", 'rb'))
     return loaded_model
 
 def predict(loaded_model,data):
