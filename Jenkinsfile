@@ -1,11 +1,17 @@
 
-   pipeline {
+    
+    pipeline {
     agent any
 
     stages {
-        stage('Hello') {
+        stage('git pull') {
             steps {
                 git url: 'https://github.com/tejadata/mlops.git', branch: 'main'
+            }
+        }
+        stage('docker cred'){
+            steps {
+               bat 'docker login -u <user_name> -p <password>'
             }
         }
         stage('python') {
