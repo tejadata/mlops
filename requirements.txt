@@ -1,3 +1,0 @@
-Flask
-gunicorn==20.0.4
-scikit-learn
