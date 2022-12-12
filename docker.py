@@ -10,6 +10,7 @@ Created on Sun Dec 11 21:15:01 2022
 
 import subprocess
 import jenkins
+import time
 
 def get_latest_build_info():
     server = jenkins.Jenkins('http://localhost:8080/', username='viswateja',
@@ -34,10 +35,13 @@ def build_image(build_num):
 
 def tag_push_image(img_name,log_file_name):
     tag_cmd="docker tag " +img_name+ " viswabhanu/"+img_name
+    print("Docker command for re tagging",tag_cmd)
     with open(log_file_name, "a") as output:
         subprocess.call(tag_cmd, shell=True, stdout=output, stderr=output)
     
     push_cmd = "docker push viswabhanu/"+img_name
+    print("Docker command for pushing",push_cmd)
+    time.sleep(20)
     with open(log_file_name, "a") as output:
         subprocess.call(push_cmd, shell=True, stdout=output, stderr=output)
     
