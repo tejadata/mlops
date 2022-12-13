@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec 11 21:15:01 2022
+Created on Sun Dec 11 22:15:01 2022
 
-@author: viswa
+@author: viswateja
 """
-
-
-
 
 import subprocess
 import jenkins
 import time
+import json
+import yaml
+
+kube={"apiVersion":"apps/v1","kind":"Deployment","metadata":{"name":"signin"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"signin"}},"template":{"metadata":{"labels":{"app":"signin"}},"spec":{"containers":[{"name":"signin","image":"assetsmanagement/asset_login_signup_5020","resources":{"requests":{"memory":"2048Mi","cpu":"1024m"},"limits":{"memory":"4096Mi","cpu":"2048m"}},"ports":[{"containerPort":5020}]}]}}}}
 
 def get_latest_build_info():
     server = jenkins.Jenkins('http://localhost:8080/', username='viswateja',
@@ -44,11 +45,29 @@ def tag_push_image(img_name,log_file_name):
     time.sleep(20)
     with open(log_file_name, "a") as output:
         subprocess.call(push_cmd, shell=True, stdout=output, stderr=output)
+
+def generate_kube_file():
+    with open(r"D:\MLOPs\mlops_code\config.json","r") as con:
+        res=json.loads(con.read())
+    kube['metadata']['name']=res['app_name']
+    kube['spec']['replicas']=res['instance_cnt']
+    kube['spec']['selector']['matchLabels']['app']=res['app_name']
+    kube['spec']['template']['metadata']['labels']['app']=res['app_name']
+    kube['spec']['template']['spec']['containers'][0]['name']=res['app_name']
+    kube['spec']['template']['spec']['containers'][0]['image']="viswabhanu/test:59"
+    kube['spec']['template']['spec']['containers'][0]['resources']['requests']['memory']=res['ram']
+    kube['spec']['template']['spec']['containers'][0]['resources']['requests']['cpu']=res['cpu']
+    kube['spec']['template']['spec']['containers'][0]['resources']['limits']['memory']=res['ram_limit']
+    kube['spec']['template']['spec']['containers'][0]['resources']['limits']['cpu']=res['cpu_limit']
+
+    with open(res['app_name']+".yaml", 'w') as outfile:
+        yaml.dump(kube, outfile, default_flow_style=False)
     
 def main_process():
     build_num=get_latest_build_info()
     img_name,log_file_name=build_image(build_num)
     tag_push_image(img_name,log_file_name)
+    generate_kube_file()
     with open(log_file_name, "r", errors="ignore") as output:
         print(output.read())
     
